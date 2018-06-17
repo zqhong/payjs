@@ -20,6 +20,5 @@ $config = [
 $payjs = new \Musnow\Payjs\Pay($config);
 
 
-
-$ret = $payjs->Close($_REQUEST); //数据验签
+$ret = $payjs->Checking($_REQUEST); //数据验签
 print_r($ret);                   //返回数据
