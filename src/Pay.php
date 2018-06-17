@@ -101,7 +101,7 @@ class Pay
      * 收银台支付
      *
      * @param array $data
-     * @return string
+     * @return Response
      */
     public function cashier(array $data = [])
     {
@@ -118,7 +118,7 @@ class Pay
      * 订单查询
      *
      * @param array $data
-     * @return string
+     * @return Response
      */
     public function query(array $data = [])
     {
@@ -131,7 +131,7 @@ class Pay
      * 关闭订单
      *
      * @param array $data
-     * @return string
+     * @return Response
      */
     public function close(array $data = [])
     {
@@ -144,7 +144,7 @@ class Pay
      * 获取用户资料
      *
      * @param array $data
-     * @return string
+     * @return Response
      */
     public function user(array $data = [])
     {
@@ -156,7 +156,7 @@ class Pay
     /**
      * 获取商户资料
      *
-     * @return string
+     * @return Response
      */
     public function info()
     {
@@ -197,7 +197,7 @@ class Pay
      *
      * @param string $method
      * @param array $data
-     * @return mixed
+     * @return Response
      */
     protected function merge($method, array $data = [])
     {
@@ -220,7 +220,7 @@ class Pay
      *
      * @param string $method
      * @param array $postData
-     * @return string|boolean 失败返回 false，成功则返回 string
+     * @return Response
      */
     protected function request($method, array $postData)
     {
