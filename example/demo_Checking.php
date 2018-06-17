@@ -7,16 +7,12 @@
  */
 require __DIR__ . '/../vendor/autoload.php';
 
-/*
-官方文档：https://payjs.cn/help/api-lie-biao/jiao-yi-xin-xi-tui-song.html
-*/
-
+// 官方文档：https://payjs.cn/help/api-lie-biao/jiao-yi-xin-xi-tui-song.html
 $config = [
-    'MerchantID' => '',                      //商户号
-    'MerchantKey' => '',                     //密钥
-    'NotifyURL' => 'https://www.baidu.com/', //notify地址 接收微信支付异步通知的回调地址。必须为可直接访问的URL，不能带参数、session验证、csrf验证。留空则不通知 需要保留最后的斜杠
+    'merchantId' => '',                      //商户号
+    'merchantKey' => '',                     //密钥
+    'notifyUrl' => 'https://www.baidu.com/', //notify地址 接收微信支付异步通知的回调地址。必须为可直接访问的URL，不能带参数、session验证、csrf验证。留空则不通知 需要保留最后的斜杠
 ];
-
 $payjs = new \Musnow\Payjs\Pay($config);
 
 
