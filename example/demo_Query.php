@@ -20,7 +20,7 @@ $config = [
 $payjs = new \Musnow\Payjs\Pay($config);
 
 $data = [
-    'PayjsOrderId' => 20180418191722003805784411,   //payjs的订单号
+    'payjs_order_id' => 20180418191722003805784411,   //payjs的订单号
 ];
 
 $ret = $payjs->query($data);    //查询订单

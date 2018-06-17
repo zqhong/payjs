@@ -104,11 +104,11 @@ class Pay
     public function cashier(array $data = [])
     {
         return $this->merge('cashier', [
-            'total_fee' => $data['TotalFee'],
-            'body' => $data['Body'],
-            'attach' => @$data['Attach'],
-            'out_trade_no' => $data['outTradeNo'],
-            'callback_url' => @$data['callbackUrl']
+            'total_fee' => $data['total_fee'],
+            'body' => $data['body'],
+            'attach' => @$data['attach'],
+            'out_trade_no' => $data['out_trade_no'],
+            'callback_url' => @$data['callback_url']
         ]);
     }
 
@@ -121,7 +121,7 @@ class Pay
     public function query(array $data = [])
     {
         return $this->merge('check', [
-            'payjs_order_id' => $data['PayjsOrderId']
+            'payjs_order_id' => $data['payjs_order_id']
         ]);
     }
 
@@ -134,7 +134,7 @@ class Pay
     public function close(array $data = [])
     {
         return $this->merge('close', [
-            'payjs_order_id' => $data['PayjsOrderId']
+            'payjs_order_id' => $data['payjs_order_id']
         ]);
     }
 

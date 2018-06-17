@@ -130,11 +130,11 @@ class PayTest extends TestCase
                     'callback_url' => $callbackUrl,
                 ],
         ], [
-            'TotalFee' => $totalFee,
-            'Body' => $body,
-            'Attach' => $attach,
-            'outTradeNo' => $outTradeNo,
-            'callbackUrl' => $callbackUrl,
+            'total_fee' => $totalFee,
+            'body' => $body,
+            'attach' => $attach,
+            'out_trade_no' => $outTradeNo,
+            'callback_url' => $callbackUrl,
         ]);
     }
 
@@ -148,7 +148,7 @@ class PayTest extends TestCase
                     'payjs_order_id' => $payJsOrderId,
                 ],
         ], [
-            'PayjsOrderId' => $payJsOrderId,
+            'payjs_order_id' => $payJsOrderId,
         ]);
     }
 
@@ -162,7 +162,7 @@ class PayTest extends TestCase
                     'payjs_order_id' => $payJsOrderId,
                 ],
         ], [
-            'PayjsOrderId' => $payJsOrderId,
+            'payjs_order_id' => $payJsOrderId,
         ]);
     }
 
