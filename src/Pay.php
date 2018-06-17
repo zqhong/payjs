@@ -51,6 +51,8 @@ class Pay
     protected $notifyUrl;
 
     /**
+     * HTTP Client
+     *
      * @var ClientInterface
      */
     protected $client;
@@ -222,7 +224,7 @@ class Pay
      */
     protected function request($method, array $postData)
     {
-        $url = $this->baseUrl . $method;
+        $url = trim($this->baseUrl, '/') . '/' . $method;
 
         $options = [
             'form_params' => $postData,
