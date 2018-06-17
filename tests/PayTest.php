@@ -34,6 +34,26 @@ class PayTest extends TestCase
         $this->assertInstanceOf(Pay::class, $pay2);
     }
 
+    /**
+     * 检查签名是否正确
+     */
+    public function testChecking()
+    {
+        $wrongSign = '12345';
+        $rightSign = '6E946566490723BB5CDF6E92707F4685';
+
+        $data = [
+            'foo' => 'bar',
+            'sign' => $wrongSign,
+        ];
+        $pay = $this->getPayObj();
+        $this->assertSame(false, $pay->checking($data));
+
+        $data['sign'] = $rightSign;
+        $this->assertSame(true, $pay->checking($data));
+
+    }
+
     public function testQrPay()
     {
         $totalFee = 100;
@@ -41,43 +61,124 @@ class PayTest extends TestCase
         $attach = "123456789";
         $outTradeNo = uniqid();
 
-        $ret = [
-            "return_code" => 1,
-            "return_msg" => "SUCCESS",
-            "payjs_order_id" => "201806171022210088xxxxxxx",
-            "out_trade_no" => $outTradeNo,
-            "total_fee" => $totalFee,
-            "qrcode" => "https://payjs.cn/qrcode/xxxxx",
-            "code_url" => "weixin://wxpay/bizpayurl?pr=xxxxx",
-        ];
+        $this->requestTest('qrPay', 'https://payjs.cn/api/native', [
+            'form_params' =>
+                [
+                    'total_fee' => $totalFee,
+                    'body' => $body,
+                    'attach' => $attach,
+                    'out_trade_no' => $outTradeNo,
+                ],
+        ], [
+                'TotalFee' => $totalFee,
+                'Body' => $body,
+                'Attach' => $attach,
+                'outTradeNo' => $outTradeNo,
+            ]
+        );
+    }
 
+    public function testCashier()
+    {
+        $totalFee = 100;
+        $body = "测试订单";
+        $attach = "123456789";
+        $outTradeNo = uniqid();
+        $callbackUrl = 'https://www.baidu.com';
+
+        $this->requestTest('cashier', 'https://payjs.cn/api/cashier', [
+            'form_params' =>
+                [
+                    'total_fee' => $totalFee,
+                    'body' => $body,
+                    'attach' => $attach,
+                    'out_trade_no' => $outTradeNo,
+                    'callback_url' => $callbackUrl,
+                ],
+        ], [
+            'TotalFee' => $totalFee,
+            'Body' => $body,
+            'Attach' => $attach,
+            'outTradeNo' => $outTradeNo,
+            'callbackUrl' => $callbackUrl,
+        ]);
+    }
+
+    public function testQuery()
+    {
+        $payJsOrderId = '12345678';
+
+        $this->requestTest('query', 'https://payjs.cn/api/check', [
+            'form_params' =>
+                [
+                    'payjs_order_id' => $payJsOrderId,
+                ],
+        ], [
+            'PayjsOrderId' => $payJsOrderId,
+        ]);
+    }
+
+    public function testClose()
+    {
+        $payJsOrderId = '12345678';
+
+        $this->requestTest('close', 'https://payjs.cn/api/close', [
+            'form_params' =>
+                [
+                    'payjs_order_id' => $payJsOrderId,
+                ],
+        ], [
+            'PayjsOrderId' => $payJsOrderId,
+        ]);
+    }
+
+    public function testUser()
+    {
+        $openId = '12345678';
+
+        $this->requestTest('user', 'https://payjs.cn/api/user', [
+            'form_params' =>
+                [
+                    'openid' => $openId,
+                ],
+        ], [
+            'openid' => $openId,
+        ]);
+    }
+
+    public function testInfo()
+    {
+        $this->requestTest('info', 'https://payjs.cn/api/info', [
+        ], [
+        ]);
+    }
+
+    /**
+     * @param string $payMethod Pay 对象方法
+     * @param string $postUrl 请求地址
+     * @param array $requestOptions guzzle 请求参数
+     * @param array $methodData Pay 对象请求数据
+     */
+    protected function requestTest($payMethod, $postUrl, $requestOptions, $methodData)
+    {
         $client = \Mockery::mock(Client::class);
         $client
             ->shouldReceive('request')
             ->with(
                 'POST',
-                'https://payjs.cn/api/native',
-                \Mockery::subset([
-                    'form_params' =>
-                        [
-                            'total_fee' => $totalFee,
-                            'body' => $body,
-                            'attach' => $attach,
-                            'out_trade_no' => $outTradeNo,
-                        ],
-                ])
+                $postUrl,
+                \Mockery::subset($requestOptions, false)
             )
-            ->andReturn(new Response(200, [], json_encode($ret, JSON_UNESCAPED_UNICODE)));
+            ->andReturn(new Response(200, [], json_encode([
+                "return_code" => 1,
+                'status' => 1,
+                'msg' => 'SUCCESS',
+                'return_msg' => 'SUCCESS',
+            ], JSON_UNESCAPED_UNICODE)));
 
         $pay = $this->getPayObj($client);
-        $qrPayResponse = $pay->qrPay([
-            'TotalFee' => $totalFee,
-            'Body' => $body,
-            'Attach' => $attach,
-            'outTradeNo' => $outTradeNo,
-        ]);
-        $qrPayJson = json_decode((string)$qrPayResponse->getBody(), true);
-        $this->assertEquals($ret, $qrPayJson);
+        $response = call_user_func_array([$pay, $payMethod], [$methodData]);
+        $this->assertInstanceOf(Response::class, $response);
     }
 
     protected function getPayObj(ClientInterface $client = null)
