@@ -104,10 +104,10 @@ class PayTest extends TestCase
                     'out_trade_no' => $outTradeNo,
                 ],
         ], [
-                'TotalFee' => $totalFee,
-                'Body' => $body,
-                'Attach' => $attach,
-                'outTradeNo' => $outTradeNo,
+                'total_fee' => $totalFee,
+                'body' => $body,
+                'attach' => $attach,
+                'out_trade_no' => $outTradeNo,
             ]
         );
     }

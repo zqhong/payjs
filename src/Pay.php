@@ -88,10 +88,10 @@ class Pay
     public function qrPay(array $data = [])
     {
         return $this->merge('native', [
-            'total_fee' => $data['TotalFee'],
-            'body' => $data['Body'],
-            'attach' => @$data['Attach'],
-            'out_trade_no' => $data['outTradeNo']
+            'total_fee' => $data['total_fee'],
+            'body' => $data['body'],
+            'attach' => @$data['attach'],
+            'out_trade_no' => $data['out_trade_no']
         ]);
     }
 
