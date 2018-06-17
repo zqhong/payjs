@@ -1,33 +1,81 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: lixia
- * Date: 2017/12/25
- * Time: 17:53
- */
 
 namespace Musnow\Payjs;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Psr7\Response;
+
 class Pay
 {
-    private $ssl = true;
-    private $requestUrl = 'https://payjs.cn/api/';
-    private $MerchantID;
-    private $MerchantKey;
-    private $NotifyURL = null;
-    private $AutoSign = true;
-    private $ToObject = true;
+    /**
+     * payjs base url
+     *
+     * @var string
+     */
+    protected $baseUrl = 'https://payjs.cn/api/';
 
     /**
-     * Payjs constructor
-     * @param $config
+     * 超时时间，单位：秒
+     *
+     * @var int
      */
-    public function __construct(array $config = [])
+    protected $timeout = 2;
+
+    /**
+     * 是否检查 ssl 证书
+     *
+     * @var bool
+     */
+    protected $ssl = true;
+
+    /**
+     * 商户号
+     *
+     * @var string
+     */
+    protected $merchantId;
+
+    /**
+     * 接口通信密钥
+     *
+     * @var string
+     */
+    protected $merchantKey;
+
+    /**
+     * 回调地址
+     *
+     * @var string
+     */
+    protected $notifyUrl;
+
+    /**
+     * @var ClientInterface
+     */
+    protected $client;
+
+    /**
+     * @param array $config
+     * @param ClientInterface|null $client
+     */
+    public function __construct(array $config = [], ClientInterface $client = null)
     {
         foreach ($config as $key => $val) {
             if (property_exists($this, $key)) {
                 $this->$key = $val;
             }
+        }
+
+        if ($client instanceof ClientInterface) {
+            $this->client = $client;
+        } else {
+            $this->client = new Client();
+        }
+
+        // 检查，merchantId 和 merchantKey 是必须项
+        if (empty($this->merchantId) || empty($this->merchantKey)) {
+            throw new \RuntimeException("必须填写 merchantId 或 merchantKey");
         }
     }
 
@@ -35,7 +83,7 @@ class Pay
      * 扫码支付
      *
      * @param array $data
-     * @return string
+     * @return Response
      */
     public function qrPay(array $data = [])
     {
@@ -139,7 +187,7 @@ class Pay
     protected function sign(array $data)
     {
         ksort($data);
-        return strtoupper(md5(urldecode(http_build_query($data)) . '&key=' . $this->MerchantKey));
+        return strtoupper(md5(urldecode(http_build_query($data)) . '&key=' . $this->merchantKey));
     }
 
     /**
@@ -151,56 +199,41 @@ class Pay
      */
     protected function merge($method, array $data = [])
     {
-        if ($this->AutoSign) {
-            if (!array_key_exists('payjs_order_id', $data)) {
-                $data['mchid'] = $this->MerchantID;
-                if (!empty($this->NotifyURL)) {
-                    $data['notify_url'] = $this->NotifyURL;
-                }
-                if (is_null(@$data['attach'])) {
-                    unset($data['attach']);
-                }
+        if (!array_key_exists('payjs_order_id', $data)) {
+            $data['mchid'] = $this->merchantId;
+            if (!empty($this->notifyUrl)) {
+                $data['notify_url'] = $this->notifyUrl;
             }
-            $data['sign'] = $this->sign($data);
+            if (is_null(@$data['attach'])) {
+                unset($data['attach']);
+            }
         }
-        return $this->curl($method, $data);
+        $data['sign'] = $this->sign($data);
+
+        return $this->request($method, $data);
     }
 
     /**
-     * 发送 curl 请求
+     * 发送 HTTP 请求
      *
-     * @param $method
-     * @param $data
-     * @param array $options
+     * @param string $method
+     * @param array $postData
      * @return string|boolean 失败返回 false，成功则返回 string
      */
-    protected function curl($method, array $data, $options = [])
+    protected function request($method, array $postData)
     {
-        $url = $this->requestUrl . $method;
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-        if (!empty($options)) {
-            curl_setopt_array($ch, $options);
-        }
-        if (!$this->ssl) {
-            // https请求 不验证证书和host
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        }
-        $curlResult = curl_exec($ch);
-        curl_close($ch);
+        $url = $this->baseUrl . $method;
 
-        if ($curlResult) {
-            if ($this->ToObject) {
-                return json_decode($curlResult);
-            } else {
-                return $curlResult;
-            }
-        } else {
-            return false;
+        $options = [
+            'form_params' => $postData,
+            'timeout' => $this->timeout,
+            'read_timeout' => $this->timeout,
+            'connect_timeout' => $this->timeout,
+        ];
+        if ($this->ssl === false) {
+            $options['verify'] = false;
         }
+
+        return $this->client->request('POST', $url, $options);
     }
 }
