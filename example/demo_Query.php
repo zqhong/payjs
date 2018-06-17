@@ -23,5 +23,5 @@ $data = [
     'PayjsOrderId' => 20180418191722003805784411,   //payjs的订单号
 ];
 
-$ret = $payjs->Query($data);    //查询订单
+$ret = $payjs->query($data);    //查询订单
 print_r($ret);                  //返回数据

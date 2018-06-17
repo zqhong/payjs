@@ -28,5 +28,5 @@ $data = [
     'callbackUrl' => '',      //用户支付成功后，前端跳转地址。留空则支付后关闭webview
 ];
 
-$ret = $payjs->Cashier($data);  //收银台模式
+$ret = $payjs->cashier($data);  //收银台模式
 print_r($ret);                  //返回数据

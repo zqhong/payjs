@@ -23,5 +23,5 @@ $data = [
     'openid' => 'o7LFAwe0HazW1M_KzdMzc-lTTv2w',   //用户 openid
 ];
 
-$ret = $payjs->User($data);    //查询
+$ret = $payjs->user($data);    //查询
 print_r($ret);                 //返回数据

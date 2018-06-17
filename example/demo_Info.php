@@ -20,5 +20,5 @@ $config = [
 $payjs = new \Musnow\Payjs\Pay($config);
 
 
-$ret = $payjs->Info();    //查询
+$ret = $payjs->info();    //查询
 print_r($ret);            //返回数据

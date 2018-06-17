@@ -19,26 +19,25 @@ class Pay
     private $ToObject = true;
 
     /**
-     * Payjs constructor.
+     * Payjs constructor
      * @param $config
      */
-    public function __construct($config = null)
+    public function __construct(array $config = [])
     {
-        if (!is_array($config)) {
-            return false;
-        }
         foreach ($config as $key => $val) {
-            if (isset($key)) {
+            if (property_exists($this, $key)) {
                 $this->$key = $val;
             }
         }
     }
 
-    /*
+    /**
      * 扫码支付
-     * @return json
+     *
+     * @param array $data
+     * @return string
      */
-    public function qrPay($data = [])
+    public function qrPay(array $data = [])
     {
         return $this->merge('native', [
             'total_fee' => $data['TotalFee'],
@@ -48,11 +47,13 @@ class Pay
         ]);
     }
 
-    /*
+    /**
      * 收银台支付
-     * @return mixed
+     *
+     * @param array $data
+     * @return string
      */
-    public function Cashier($data = [])
+    public function cashier(array $data = [])
     {
         return $this->merge('cashier', [
             'total_fee' => $data['TotalFee'],
@@ -63,75 +64,92 @@ class Pay
         ]);
     }
 
-    /*
+    /**
      * 订单查询
-     * @return mixed
+     *
+     * @param array $data
+     * @return string
      */
-    public function Query($data = [])
+    public function query(array $data = [])
     {
         return $this->merge('check', [
             'payjs_order_id' => $data['PayjsOrderId']
         ]);
     }
 
-    /*
+    /**
      * 关闭订单
-     * @return json
+     *
+     * @param array $data
+     * @return string
      */
-    public function Close($data = [])
+    public function close(array $data = [])
     {
         return $this->merge('close', [
             'payjs_order_id' => $data['PayjsOrderId']
         ]);
     }
 
-    /*
+    /**
      * 获取用户资料
-     * @return json
+     *
+     * @param array $data
+     * @return string
      */
-    public function User($data = []){
+    public function user(array $data = [])
+    {
         return $this->merge('user', [
             'openid' => $data['openid']
         ]);
     }
 
-    /*
+    /**
      * 获取商户资料
-     * @return json
+     *
+     * @return string
      */
-    public function Info(){
+    public function info()
+    {
         return $this->merge('info');
     }
-    /*
+
+    /**
      * 验证notify数据
-     * @return Boolean
+     *
+     * @param array $data
+     * @return bool
      */
-    public function Checking($data = array())
+    public function checking(array $data = [])
     {
         $beSign = $data['sign'];
         unset($data['sign']);
-        if ($this->Sign($data) == $beSign) {
+        if ($this->sign($data) == $beSign) {
             return true;
         } else {
             return false;
         }
     }
 
-    /*
+    /**
      * 数据签名
+     *
+     * @param array $data
      * @return string
      */
-    protected function Sign(array $data)
+    protected function sign(array $data)
     {
         ksort($data);
         return strtoupper(md5(urldecode(http_build_query($data)) . '&key=' . $this->MerchantKey));
     }
 
-    /*
+    /**
      * 预处理数据
+     *
+     * @param string $method
+     * @param array $data
      * @return mixed
      */
-    protected function merge($method, $data = [])
+    protected function merge($method, array $data = [])
     {
         if ($this->AutoSign) {
             if (!array_key_exists('payjs_order_id', $data)) {
@@ -143,16 +161,20 @@ class Pay
                     unset($data['attach']);
                 }
             }
-            $data['sign'] = $this->Sign($data);
+            $data['sign'] = $this->sign($data);
         }
-        return $this->Curl($method, $data);
+        return $this->curl($method, $data);
     }
 
-    /*
-     * curl
-     * @return mixed
-    */
-    protected function Curl($method, $data, $options = array())
+    /**
+     * 发送 curl 请求
+     *
+     * @param $method
+     * @param $data
+     * @param array $options
+     * @return string|boolean 失败返回 false，成功则返回 string
+     */
+    protected function curl($method, array $data, $options = [])
     {
         $url = $this->requestUrl . $method;
         $ch = curl_init();
@@ -164,18 +186,18 @@ class Pay
             curl_setopt_array($ch, $options);
         }
         if (!$this->ssl) {
-            //https请求 不验证证书和host
+            // https请求 不验证证书和host
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         }
-        $cexecute = curl_exec($ch);
+        $curlResult = curl_exec($ch);
         curl_close($ch);
 
-        if ($cexecute) {
+        if ($curlResult) {
             if ($this->ToObject) {
-                return json_decode($cexecute);
+                return json_decode($curlResult);
             } else {
-                return $cexecute;
+                return $curlResult;
             }
         } else {
             return false;
