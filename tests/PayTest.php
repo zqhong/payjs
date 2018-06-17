@@ -51,7 +51,41 @@ class PayTest extends TestCase
 
         $data['sign'] = $rightSign;
         $this->assertSame(true, $pay->checking($data));
+    }
 
+    public function testRequestOptions()
+    {
+        $timeout = 10;
+        $ssl = false;
+
+        $client = \Mockery::mock(Client::class);
+        $client
+            ->shouldReceive('request')
+            ->with(
+                'POST',
+                'https://payjs.cn/api/info',
+                \Mockery::subset([
+                    'timeout' => $timeout,
+                    'read_timeout' => $timeout,
+                    'connect_timeout' => $timeout,
+                    'verify' => $ssl,
+                ], false)
+            )
+            ->andReturn(new Response(200, [], json_encode([
+                "return_code" => 1,
+                'status' => 1,
+                'msg' => 'SUCCESS',
+                'return_msg' => 'SUCCESS',
+            ], JSON_UNESCAPED_UNICODE)));
+
+        $pay = new Pay([
+            'merchantId' => '123',
+            'merchantKey' => '123',
+            'ssl' => $ssl,
+            'timeout' => $timeout,
+        ], $client);
+        $response = $pay->info();
+        $this->assertInstanceOf(Response::class, $response);
     }
 
     public function testQrPay()
