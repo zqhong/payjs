@@ -9,7 +9,7 @@ https://payjs.cn/
 如果你想使用本项目请使用 composer 安装
 
 ```$xslt
-$ composer require musnow/payjs
+$ composer require -vvv musnow/payjs
 ```
 或者在你的项目跟目录编辑 ```composer.json```
 ```$xslt
@@ -53,5 +53,5 @@ print_r($ret);                //返回数据
 水平有限，如果你发现哪里有错误请提交issues，感激不尽。
 
 
-#License  
+# License
 payjs is under the MIT license.
