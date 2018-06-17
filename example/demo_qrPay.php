@@ -5,7 +5,7 @@
  * Date: 2018/4/18
  * Time: 19:24
  */
-require '../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 /*
 官方文档：https://payjs.cn/help/api-lie-biao/sao-ma-zhi-fu.html
