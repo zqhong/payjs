@@ -166,6 +166,20 @@ class PayTest extends TestCase
         ]);
     }
 
+    public function testRefund()
+    {
+        $payJsOrderId = '12345678';
+
+        $this->requestTest('refund', 'https://payjs.cn/api/refund', [
+            'form_params' =>
+                [
+                    'payjs_order_id' => $payJsOrderId,
+                ],
+        ], [
+            'payjs_order_id' => $payJsOrderId,
+        ]);
+    }
+
     public function testUser()
     {
         $openId = '12345678';

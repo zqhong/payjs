@@ -164,6 +164,19 @@ class Pay
     }
 
     /**
+     * 退款
+     *
+     * @param array $data
+     * @return Response
+     */
+    public function refund(array $data = [])
+    {
+        return $this->merge("refund", [
+            'payjs_order_id' => $data['payjs_order_id']
+        ]);
+    }
+
+    /**
      * 验证notify数据
      *
      * @param array $data
