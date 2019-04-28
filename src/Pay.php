@@ -89,12 +89,18 @@ class Pay
      */
     public function qrPay(array $data = [])
     {
-        return $this->merge('native', [
+        $config = [
             'total_fee' => $data['total_fee'],
             'body' => $data['body'],
             'attach' => @$data['attach'],
             'out_trade_no' => $data['out_trade_no']
-        ]);
+        ];
+        // 留空表示微信支付。支付宝交易传值：alipay
+        if (isset($data['type']) && !empty($data['type'])) {
+            $config['type'] = strval($data['type']);
+        }
+
+        return $this->merge('native', $config);
     }
 
     /**
